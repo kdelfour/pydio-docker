@@ -17,6 +17,7 @@ RUN apt-get install -yq wget unzip nginx fontconfig-config fonts-dejavu-core \
 # ------------------------------------------------------------------------------
 # Configure mysql
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+RUN mysql_install_db --user=mysql --basedir=/usr/ --ldata=/var/lib/mysql/
 RUN service mysql start && \
     mysql -uroot -e "CREATE DATABASE IF NOT EXISTS pydio;" && \
     mysql -uroot -e "CREATE USER 'pydio'@'localhost' IDENTIFIED BY 'pydio';" && \
