@@ -4,6 +4,7 @@
 # Pull base image.
 FROM kdelfour/supervisor-docker
 MAINTAINER Kevin Delfour <kevin@delfour.eu>
+ENV PYDIO_VERSION 6.4.1
 
 # ------------------------------------------------------------------------------
 # Install Base
@@ -21,13 +22,13 @@ RUN service mysql start && \
     mysql -uroot -e "CREATE USER 'pydio'@'localhost' IDENTIFIED BY 'pydio';" && \
     mysql -uroot -e "GRANT ALL PRIVILEGES ON *.* TO 'pydio'@'localhost' WITH GRANT OPTION;" && \
     mysql -uroot -e "FLUSH PRIVILEGES;"
-    
+
 # ------------------------------------------------------------------------------
 # Configure php-fpm
 RUN sed -i -e "s/output_buffering\s*=\s*4096/output_buffering = Off/g" /etc/php5/fpm/php.ini
 RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 1G/g" /etc/php5/fpm/php.ini
-RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 1G/g" /etc/php5/fpm/php.ini
+RUN sed -i -e "s/upload_max_filesize\s*=\s*2M/upload_max_filesize = 20G/g" /etc/php5/fpm/php.ini
+RUN sed -i -e "s/post_max_size\s*=\s*8M/post_max_size = 20G/g" /etc/php5/fpm/php.ini
 RUN php5enmod mcrypt
 
 # ------------------------------------------------------------------------------
@@ -37,7 +38,7 @@ RUN chown www-data:www-data /var/www
 RUN rm /etc/nginx/sites-enabled/*
 RUN rm /etc/nginx/sites-available/*
 RUN sed -i -e"s/keepalive_timeout\s*65/keepalive_timeout 2/" /etc/nginx/nginx.conf
-RUN sed -i -e"s/keepalive_timeout 2/keepalive_timeout 2;\n\tclient_max_body_size 100m/" /etc/nginx/nginx.conf
+RUN sed -i -e"s/keepalive_timeout 2/keepalive_timeout 2;\n\tclient_max_body_size 20g/" /etc/nginx/nginx.conf
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 ADD conf/pydio /etc/nginx/sites-enabled/
 RUN mkdir /etc/nginx/ssl
@@ -51,7 +52,6 @@ RUN update-rc.d mysql defaults
 
 # ------------------------------------------------------------------------------
 # Install Pydio
-ENV PYDIO_VERSION 6.4.1
 WORKDIR /var/www
 RUN wget http://downloads.sourceforge.net/project/ajaxplorer/pydio/stable-channel/${PYDIO_VERSION}/pydio-core-${PYDIO_VERSION}.zip
 RUN unzip pydio-core-${PYDIO_VERSION}.zip
@@ -61,8 +61,6 @@ RUN chmod -R 770 /var/www/pydio-core
 RUN chmod 777  /var/www/pydio-core/data/files/
 RUN chmod 777  /var/www/pydio-core/data/personal/
 
-WORKDIR /
-RUN ln -s /var/www/pydio-core/data pydio-data 
 # ------------------------------------------------------------------------------
 # Expose ports.
 EXPOSE 80
@@ -70,8 +68,9 @@ EXPOSE 443
 
 # ------------------------------------------------------------------------------
 # Expose volumes
-VOLUME /pydio-data/files
-VOLUME /pydio-data/personal
+VOLUME /var/www/pydio-core/data/files/
+VOLUME /var/www/pydio-core/data/personal/
+VOLUME /var/lib/mysql
 
 # ------------------------------------------------------------------------------
 # Add supervisord conf

@@ -17,18 +17,18 @@ Download automated build from public Docker Hub Registry: docker pull kdelfour/p
 ## Usage
 
     docker run -it -d -p 80:80 -p 443:443 kdelfour/pydio-docker
-    
-You can add a shared directory as a volume directory with the argument *-v /your-path/files/:/pydio-data/files/ -v /your-path/personal/:/pydio-data/personal/* like this :
 
-    docker run -it -d -p 80:80 -p 443:443 -v /your-path/files/:/pydio-data/files/ -v /your-path/personal/:/pydio-data/personal/ kdelfour/pydio-docker
+You can add a shared directory as a volume directory with the argument *-v /your-path/files/:/var/www/pydio-core/data/files/ -v /your-path/personal/:/var/www/pydio-core/data/personal/ -v /your-path/mysql:/var/lib/mysql/* like this :
 
-A mysql server with a database is ready, you can use it with this parameters : 
+    docker run -it -d -p 80:80 -p 443:443 -v /your-path/files/:/var/www/pydio-core/data/files/ -v /your-path/personal/:/var/www/pydio-core/data/personal/ -v /your-path/mysql:/var/lib/mysql/ kdelfour/pydio-docker
+
+A mysql server with a database is ready, you can use it with this parameters :
 
   - url : localhost
   - database name : pydio
   - user name : pydio
   - user password : pydio
-    
+
 ## Build and run with custom config directory
 
 Get the latest version from github
@@ -39,10 +39,10 @@ Get the latest version from github
 Build it
 
     sudo docker build --force-rm=true --tag="$USER/pydio-docker:latest" .
-    
+
 And run
 
-    sudo docker run -d -p 80:80 -p 443:443 -v /your-path/files/:/pydio-data/files/ -v /your-path/personal/:/pydio-data/personal/ $USER/pydio-docker:latest
+    sudo docker run -d -p 80:80 -p 443:443 -v /your-path/files/:/var/www/pydio-core/data/files/ -v /your-path/personal/:/var/www/pydio-core/data/personal/ -v /your-path/mysql:/var/lib/mysql/ $USER/pydio-docker:latest
 
 ## After the installation
 
@@ -51,5 +51,5 @@ To make sure that share feature will work, go to Main Pydio Option and add  :
   * server URL : https//your_server_name
   * download folder : /var/www/pydio-core/data/public
   * server download URL : https//your_server_name/data/public
-  
+
 Great and Enjoy !!
